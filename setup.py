@@ -13,8 +13,7 @@ setup(
     install_requires=[                               # Dependencies for your package
         "pandas",
         "openpyxl",
-        "koboextractor",
-        "io"
+        "koboextractor"
     ],
     classifiers=[                                    # Optional metadata for package indexing
         "Programming Language :: Python :: 3",
