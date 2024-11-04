@@ -40,14 +40,11 @@ def raw_data_to_excel(df, file_path, sheet_name):
 #-----------Adjusting cells--------------
     for col in worksheet.columns:
         max_length = 0
-        col_letter = col[0].column_letter
+        col_letter = col[0].column_letter  # Get the column letter
         for cell in col:
-            try:
-                if cell.value:
-                    max_length = max(max_length, len(str(cell.value)))
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        worksheet.column_dimensions[col_letter].width = adjusted_width
+            if cell.value:
+                # Estimate width by multiplying character count by a width factor
+                max_length = max(max_length, len(str(cell.value)) * 1.2)  # Adjust 1.2 as needed
+        worksheet.column_dimensions[col_letter].width = max_length
 
     workbook.save(file_path)
