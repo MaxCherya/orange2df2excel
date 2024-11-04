@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="orange2df2xcel",                           # The name of your package
-    version="0.1",                                   # Initial version
+    name="orange2df2excel",                           # The name of your package
+    version="0.2",                                   # Initial version
     author="maxchergik",                              # Replace with your name
     author_email="maxchergik@gmail.com",           # Replace with your email
     description="Tools for working with DataFrames and saving to Excel",
