@@ -7,4 +7,4 @@ A Python package with tools for working with DataFrames and saving them to Excel
 To install this package directly from GitHub, use:
 
 ```bash
-pip install git+https://github.com/yourusername/orange2df2xcel.git
+pip install git+https://github.com/MaxCherya/orange2df2excel.git
