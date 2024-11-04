@@ -5,6 +5,7 @@ from koboextractor import KoboExtractor
 import requests
 import pandas as pd
 import os
+from io import StringIO
 
 def raw_data_to_excel(df, file_path, sheet_name):
     """
@@ -81,3 +82,39 @@ def fetch_kobo_data(token, form_id, base_url="https://kf.kobotoolbox.org/api/v2"
 
     except Exception as err:
         print(f"Error fetching data: {err}")
+
+def fetch_surveycto_data(isDataset, servername, form_or_dataset_id, username, password):
+    """
+    Fetch data from SurveyCTO for a specified form or dataset and load it into a DataFrame.
+    
+    Parameters:
+    - isDataset (bool): If True, fetches data from a dataset; if False, fetches data from a form.
+    - servername (str): The SurveyCTO server name (without "https://").
+    - form_or_dataset_id (str): The unique ID of the form or dataset to fetch data from.
+    - username (str): The SurveyCTO username for authentication.
+    - password (str): The SurveyCTO password for authentication.
+
+    Returns:
+    - df (pandas.DataFrame): Data from SurveyCTO in a DataFrame format.
+    """
+    if isDataset:
+        endpoint = f"https://{servername}.surveycto.com/api/v2/datasets/data/csv/{form_or_dataset_id}"
+    else:
+        endpoint = f"https://{servername}.surveycto.com/api/v1/forms/data/csv/{form_or_dataset_id}"
+    
+    try:
+        auth = (username, password)
+        
+        print("Fetching data from SurveyCTO...")
+        response = requests.get(endpoint, auth=auth)
+        response.raise_for_status()
+
+        df = pd.read_csv(StringIO(response.text))
+        
+        print("Data fetched successfully!")
+        return df
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
