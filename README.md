@@ -63,10 +63,48 @@ print(df.head())
 
 This function provides a simple interface for retrieving KoBoToolbox data into a format suitable for data analysis, without needing to handle the API response manually.
 
+### Function: `fetch_surveycto_data`
+
+The `fetch_surveycto_data` function retrieves data from a specified SurveyCTO form or dataset and loads it into a pandas DataFrame, allowing for easy analysis and manipulation within Python. This function dynamically adjusts the API endpoint based on whether you are fetching from a form or a dataset, making it flexible for various data retrieval tasks on SurveyCTO.
+
+#### Parameters
+
+- `isDataset` (bool): Determines whether to fetch data from a dataset (`True`) or a form (`False`).
+- `servername` (str): The SurveyCTO server name (excluding "https://"). For example, if your server URL is `https://yourserver.surveycto.com`, use `yourserver`.
+- `form_or_dataset_id` (str): The unique ID of the form or dataset to retrieve data from. This ID can be found in the SurveyCTO dashboard.
+- `username` (str): The SurveyCTO username for authentication.
+- `password` (str): The SurveyCTO password for authentication.
+
+#### Returns
+
+- `df` (pandas.DataFrame): A DataFrame containing the fetched data, where each row represents a submission, and each column corresponds to a field in the form or dataset.
+
+#### Example
+
+```python
+from orange2df2xcel import fetch_surveycto_data
+
+# Define SurveyCTO credentials and parameters
+is_dataset = True  # Set to False if fetching from a form
+servername = "your_server_name"
+form_or_dataset_id = "your_form_or_dataset_id"
+username = "your_username"
+password = "your_password"
+
+# Fetch data from SurveyCTO and store it in a DataFrame
+df = fetch_surveycto_data(is_dataset, servername, form_or_dataset_id, username, password)
+
+# Display the data
+print(df.head())
+```
+
+This function provides a straightforward interface for retrieving data from SurveyCTO, handling authentication and endpoint selection automatically, so you don’t need to manage API interactions manually.
+
 ## Requirements
 
 - **pandas**
 - **openpyxl**
+- **koboextractor**
 
 ## License
 
