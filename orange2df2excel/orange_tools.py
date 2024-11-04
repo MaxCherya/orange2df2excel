@@ -1,6 +1,8 @@
 from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils.dataframe import dataframe_to_rows
+import requests
+import pandas as pd
 import os
 
 def raw_data_to_excel(df, file_path, sheet_name):
@@ -48,5 +50,41 @@ def raw_data_to_excel(df, file_path, sheet_name):
         adjusted_width = (max_length + 2)
         worksheet.column_dimensions[col_letter].width = adjusted_width
 
-    print(f"Raw data uploaded succesfully to {file_path}")
     workbook.save(file_path)
+
+def fetch_kobo_data(token, form_id, base_url="https://kf.kobotoolbox.org/api/v2"):
+    """
+    Fetch data from KoBoToolbox for a specified form and load it into a DataFrame.
+    
+    Parameters:
+    - token (str): API token for KoBoToolbox.
+    - form_id (str): The unique identifier of the form to fetch data from.
+    - base_url (str): The base URL for the KoBoToolbox API. Default is for KoBoToolbox.
+
+    Returns:
+    - df (pandas.DataFrame): Data from KoBoToolbox in a DataFrame format.
+    """
+    headers = {
+        "Authorization": f"Token {token}"
+    }
+
+    # Define the endpoint for fetching data from a specific form
+    data_url = f"{base_url}/assets/{form_id}/data/"
+    
+    try:
+        # Fetch the data
+        print("Fetching data from KoBoToolbox...")
+        response = requests.get(data_url, headers=headers)
+        response.raise_for_status()  # Raise an error for bad status codes
+
+        # Convert the JSON response to a DataFrame
+        data = response.json()
+        df = pd.json_normalize(data['results'])
+
+        print("Data fetched successfully!")
+        return df
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
