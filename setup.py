@@ -12,7 +12,8 @@ setup(
     packages=find_packages(),                        # Finds the sub-packages automatically
     install_requires=[                               # Dependencies for your package
         "pandas",
-        "openpyxl"
+        "openpyxl",
+        "koboextractor"
     ],
     classifiers=[                                    # Optional metadata for package indexing
         "Programming Language :: Python :: 3",
