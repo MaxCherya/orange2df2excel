@@ -1,0 +1,9 @@
+README.md
+setup.py
+orange2df2excel/__init__.py
+orange2df2excel/orange_tools.py
+orange2df2xcel.egg-info/PKG-INFO
+orange2df2xcel.egg-info/SOURCES.txt
+orange2df2xcel.egg-info/dependency_links.txt
+orange2df2xcel.egg-info/requires.txt
+orange2df2xcel.egg-info/top_level.txt

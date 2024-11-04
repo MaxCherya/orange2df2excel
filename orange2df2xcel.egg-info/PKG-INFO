@@ -1,0 +1,25 @@
+Metadata-Version: 2.1
+Name: orange2df2xcel
+Version: 0.1
+Summary: Tools for working with DataFrames and saving to Excel
+Home-page: https://github.com/yourusername/orange2df2xcel
+Author: maxchergik
+Author-email: maxchergik@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: pandas
+Requires-Dist: openpyxl
+
+# orange2df2xcel
+
+A Python package with tools for working with DataFrames and saving them to Excel in a structured format.
+
+## Installation
+
+To install this package directly from GitHub, use:
+
+```bash
+pip install git+https://github.com/yourusername/orange2df2xcel.git
