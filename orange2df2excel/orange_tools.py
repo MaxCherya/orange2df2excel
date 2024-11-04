@@ -48,4 +48,5 @@ def raw_data_to_excel(df, file_path, sheet_name):
         adjusted_width = (max_length + 2)
         worksheet.column_dimensions[col_letter].width = adjusted_width
 
+    print(f"Raw data uploaded succesfully to {file_path}")
     workbook.save(file_path)
