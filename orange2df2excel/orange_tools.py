@@ -26,7 +26,7 @@ def raw_data_to_excel(df, file_path, sheet_name):
     for row in dataframe_to_rows(df, index=False, header=True):
         worksheet.append(row)
 
-    table = Table(displayName="Table1", ref=worksheet.dimensions)
+    table = Table(displayName="raw_data", ref=worksheet.dimensions)
     style = TableStyleInfo(
         name="TableStyleMedium9",
         showFirstColumn=False,
@@ -36,5 +36,18 @@ def raw_data_to_excel(df, file_path, sheet_name):
     )
     table.tableStyleInfo = style
     worksheet.add_table(table)
+
+#-----------Adjusting cells--------------
+    for col in worksheet.columns:
+        max_length = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            try:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        worksheet.column_dimensions[col_letter].width = adjusted_width
 
     workbook.save(file_path)
