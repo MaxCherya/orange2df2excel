@@ -44,7 +44,8 @@ def raw_data_to_excel(df, file_path, sheet_name):
         for cell in col:
             if cell.value:
                 # Estimate width by multiplying character count by a width factor
-                max_length = max(max_length, len(str(cell.value)) * 1.2)  # Adjust 1.2 as needed
-        worksheet.column_dimensions[col_letter].width = max_length
+                max_length = max(max_length, len(str(cell.value)))
+        adjusted_width = (max_length + 2)
+        worksheet.column_dimensions[col_letter].width = adjusted_width
 
     workbook.save(file_path)
