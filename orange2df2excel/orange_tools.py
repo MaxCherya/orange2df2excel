@@ -139,9 +139,11 @@ def generate_bnf_id(name, surname, dob):
     # Convert DOB from 'YYYY-MM-DD' to 'DDMMYY' format
     dob_parts = dob.split("-")
     dob_formatted = dob_parts[2] + dob_parts[1] + dob_parts[0][2:]  # DDMMYY format
+
+    to_hash = f'{surname}{name}{dob_parts}'
     
     base_id = f"{surname_length}-{surname_part}-{name_part}-{dob_formatted}"
-    hash_suffix = hashlib.md5(base_id.encode()).hexdigest()
+    hash_suffix = hashlib.md5(to_hash.encode()).hexdigest()
     beneficiary_id = f"{base_id}-{hash_suffix}"
     
     return beneficiary_id
