@@ -1,4 +1,4 @@
-# orange2df2xcel
+# orange2df2excel
 
 A Python package with tools for working with DataFrames and saving them to Excel in a structured format.
 
