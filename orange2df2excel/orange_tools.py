@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 import os
 from io import StringIO
+import hashlib
 
 def raw_data_to_excel(df, file_path, sheet_name):
     """
@@ -118,3 +119,30 @@ def fetch_surveycto_data(isDataset, servername, form_or_dataset_id, username, pa
         print(f"HTTP error occurred: {http_err}")
     except Exception as err:
         print(f"Other error occurred: {err}")
+
+def generate_bnf_id(name, surname, dob):
+    """
+    Generates a unique beneficiary ID with a hash as the final component.
+
+    Parameters:
+        name (str): First name of the person.
+        surname (str): Last name of the person.
+        dob (str): Date of birth in 'YYYY-MM-DD' format.
+
+    Returns:
+        str: Generated unique beneficiary ID with hash included.
+    """
+    surname_length = len(surname)
+    surname_part = surname[:3].upper().ljust(3, 'X')  # Pads with 'X' if fewer than 3 letters
+    name_part = name[:3].upper().ljust(3, 'X')
+    
+    # Convert DOB from 'YYYY-MM-DD' to 'DDMMYY' format
+    dob_parts = dob.split("-")
+    dob_formatted = dob_parts[2] + dob_parts[1] + dob_parts[0][2:]  # DDMMYY format
+    
+    base_id = f"{surname_length}-{surname_part}-{name_part}-{dob_formatted}"
+    hash_suffix = hashlib.md5(base_id.encode()).hexdigest()
+    beneficiary_id = f"{base_id}-{hash_suffix}"
+    
+    return beneficiary_id
+

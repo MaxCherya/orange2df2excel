@@ -100,6 +100,42 @@ print(df.head())
 
 This function provides a straightforward interface for retrieving data from SurveyCTO, handling authentication and endpoint selection automatically, so you don’t need to manage API interactions manually.
 
+### Function: `generate_bnf_id`
+
+The `generate_bnf_id` function creates a unique beneficiary ID based on the person's name, surname, and date of birth. This ID structure includes specific information about the beneficiary, such as surname length, initials, formatted date of birth, and a unique hash component to ensure uniqueness.
+
+#### Parameters
+
+- `name` (str): The first name of the beneficiary.
+- `surname` (str): The last name of the beneficiary.
+- `dob` (str): The beneficiary's date of birth, formatted as `YYYY-MM-DD`.
+
+#### Returns
+
+- `beneficiary_id` (str): A unique ID for the beneficiary, structured as follows: 
+  - The length of the surname.
+  - The first three characters of the surname (padded with 'X' if fewer than three characters).
+  - The first three characters of the name (padded with 'X' if fewer than three characters).
+  - The date of birth in `DDMMYY` format.
+  - A hash of the generated ID components to ensure uniqueness.
+
+#### Example
+
+```python
+# Example usage of generate_bnf_id
+name = "John"
+surname = "Smith"
+dob = "1990-01-01"
+
+# Generate unique beneficiary ID
+beneficiary_id = generate_bnf_id(name, surname, dob)
+
+# Output the generated ID
+print(beneficiary_id)  # Example output: "5-SMI-JOH-010190-a1b2c3d4e5f67890abcd1234567890ef"
+```
+
+This function ensures each generated ID is unique by combining structured personal data with a full hash component, allowing for consistency and minimizing the chance of duplicates even with similar input data.
+
 ## Requirements
 
 - **pandas**
