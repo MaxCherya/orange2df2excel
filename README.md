@@ -247,6 +247,8 @@ This function is particularly useful for securely regenerating the encryption ke
 - **pandas**
 - **openpyxl**
 - **koboextractor**
+- **cryptography**
+- **pycryptodome**
 
 ## License
 
