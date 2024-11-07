@@ -3,6 +3,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils.dataframe import dataframe_to_rows
 from koboextractor import KoboExtractor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import PBKDF2
