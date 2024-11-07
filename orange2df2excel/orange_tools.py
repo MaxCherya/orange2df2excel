@@ -2,6 +2,9 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils.dataframe import dataframe_to_rows
 from koboextractor import KoboExtractor
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+import base64
 import requests
 import pandas as pd
 import os
@@ -148,3 +151,24 @@ def generate_bnf_id(name, surname, dob):
     
     return beneficiary_id
 
+def gen_encryption_key():
+    key = os.urandom(32)
+    return key
+
+def encrypt_value(value, key):
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    padded_value = value.ljust(16 * ((len(value) + 15) // 16))
+    ciphertext = encryptor.update(padded_value.encode()) + encryptor.finalize()
+    encrypted_value = base64.b64encode(iv + ciphertext).decode('utf-8')
+    return encrypted_value
+
+def decrypt_value(encrypted_value, key):
+    encrypted_data = base64.b64decode(encrypted_value)
+    iv = encrypted_data[:16]
+    ciphertext = encrypted_data[16:]
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted_value = decryptor.update(ciphertext) + decryptor.finalize()
+    return decrypted_value.decode('utf-8').strip()
