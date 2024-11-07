@@ -174,50 +174,29 @@ def gen_encryption_key(password):
 
 def encrypt_value(value, key):
     """
-    Encrypts a given value (string or number) using AES encryption in CBC mode with a random initialization vector (IV).
-
-    Parameters:
-        value (str, int, float): The plaintext value to encrypt. Can be a string or a number.
-        key (bytes): The 32-byte AES encryption key.
-
-    Returns:
-        str: The base64-encoded encrypted value.
+    Encrypts a given value (string or number) using AES encryption in CBC mode with a random IV.
     """
-    value = str(value)
+    value = str(value).encode()
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-    padded_value = value.ljust(16 * ((len(value) + 15) // 16))
-    ciphertext = encryptor.update(padded_value.encode()) + encryptor.finalize()
+    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    padded_value = padder.update(value) + padder.finalize()
+    ciphertext = encryptor.update(padded_value) + encryptor.finalize()
     encrypted_value = base64.b64encode(iv + ciphertext).decode('utf-8')
+    
     return encrypted_value
 
 def decrypt_value(encrypted_data, key):
     """
     Decrypts a given encrypted value using AES encryption in CBC mode.
-
-    Parameters:
-        encrypted_data (str): The base64-encoded encrypted value, including IV + ciphertext.
-        key (bytes): The 32-byte AES decryption key.
-
-    Returns:
-        str: The decrypted plaintext value as a string.
     """
-    # Decode the base64-encoded encrypted data
     encrypted_data_bytes = base64.b64decode(encrypted_data)
-
-    # Extract IV (first 16 bytes) and ciphertext (remaining bytes)
     iv = encrypted_data_bytes[:16]
     ciphertext = encrypted_data_bytes[16:]
-
-    # Create AES cipher in CBC mode
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    
-    # Decrypt the ciphertext
     decrypted_padded_value = decryptor.update(ciphertext) + decryptor.finalize()
-
-    # Remove padding
     unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
     decrypted_value = unpadder.update(decrypted_padded_value) + unpadder.finalize()
     
