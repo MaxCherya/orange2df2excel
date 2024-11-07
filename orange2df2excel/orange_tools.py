@@ -4,6 +4,11 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from koboextractor import KoboExtractor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+from Crypto.Random import get_random_bytes
+from Crypto.Protocol.KDF import PBKDF2
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Protocol.KDF import PBKDF2
 import base64
 import requests
 import pandas as pd
@@ -151,11 +156,33 @@ def generate_bnf_id(name, surname, dob):
     
     return beneficiary_id
 
-def gen_encryption_key():
-    key = os.urandom(32)
-    return key
+def gen_encryption_key(password):
+    """
+    Generates an AES encryption key using a password and a random salt.
+
+    Parameters:
+        password (str): The password or passphrase used for key derivation.
+
+    Returns:
+        str: A formatted string showing the derived key and salt.
+    """
+    salt = get_random_bytes(32)
+    key = PBKDF2(password, salt, dkLen=32, count=1000000)
+    formatted = f"Key: {key}\nSalt: {salt}"
+    return formatted
 
 def encrypt_value(value, key):
+    """
+    Encrypts a given value (string or number) using AES encryption in CBC mode with a random initialization vector (IV).
+
+    Parameters:
+        value (str, int, float): The plaintext value to encrypt. Can be a string or a number.
+        key (bytes): The 32-byte AES encryption key.
+
+    Returns:
+        str: The base64-encoded encrypted value.
+    """
+    value = str(value)
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
@@ -165,6 +192,16 @@ def encrypt_value(value, key):
     return encrypted_value
 
 def decrypt_value(encrypted_value, key):
+    """
+    Decrypts a given encrypted value using AES encryption in CBC mode.
+
+    Parameters:
+        encrypted_value (str): The base64-encoded encrypted value.
+        key (bytes): The 32-byte AES decryption key.
+
+    Returns:
+        str: The decrypted plaintext value as a string.
+    """
     encrypted_data = base64.b64decode(encrypted_value)
     iv = encrypted_data[:16]
     ciphertext = encrypted_data[16:]
@@ -172,3 +209,17 @@ def decrypt_value(encrypted_value, key):
     decryptor = cipher.decryptor()
     decrypted_value = decryptor.update(ciphertext) + decryptor.finalize()
     return decrypted_value.decode('utf-8').strip()
+
+def rederive_key(password, salt):
+    """
+    Re-derives the AES encryption key using the original password and salt.
+
+    Parameters:
+        password (str): The original password or passphrase used for key derivation.
+        salt (bytes): The original salt used during the initial key derivation.
+
+    Returns:
+        bytes: The re-derived 32-byte encryption key.
+    """
+    key = PBKDF2(password, salt, dkLen=32, count=1000000)
+    return key
