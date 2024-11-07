@@ -209,18 +209,31 @@ def decrypt_value(encrypted_data, key):
     Decrypts a given encrypted value using AES encryption in CBC mode.
 
     Parameters:
-        encrypted_value (str): The base64-encoded encrypted value.
+        encrypted_data (str): The base64-encoded encrypted value, including IV + ciphertext.
         key (bytes): The 32-byte AES decryption key.
 
     Returns:
         str: The decrypted plaintext value as a string.
     """
-    iv = encrypted_data[:16]
-    ciphertext = encrypted_data[16:]
+    # Decode the base64-encoded encrypted data
+    encrypted_data_bytes = base64.b64decode(encrypted_data)
+
+    # Extract IV (first 16 bytes) and ciphertext (remaining bytes)
+    iv = encrypted_data_bytes[:16]
+    ciphertext = encrypted_data_bytes[16:]
+
+    # Create AES cipher in CBC mode
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    decrypted_value = decryptor.update(ciphertext) + decryptor.finalize()
-    return decrypted_value.decode('utf-8').strip()
+    
+    # Decrypt the ciphertext
+    decrypted_padded_value = decryptor.update(ciphertext) + decryptor.finalize()
+
+    # Remove padding
+    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+    decrypted_value = unpadder.update(decrypted_padded_value) + unpadder.finalize()
+    
+    return decrypted_value.decode('utf-8')
 
 def rederive_key(password, salt):
     """
