@@ -182,13 +182,26 @@ def encrypt_value(value, key):
     Returns:
         str: The base64-encoded encrypted value.
     """
+    # Ensure value is a string
     value = str(value)
+    
+    # Generate a random 16-byte IV
     iv = os.urandom(16)
+    
+    # Create AES cipher in CBC mode
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-    padded_value = value.ljust(16 * ((len(value) + 15) // 16))
-    ciphertext = encryptor.update(padded_value.encode()) + encryptor.finalize()
+    
+    # Apply PKCS7 padding to the plaintext value
+    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    padded_value = padder.update(value.encode()) + padder.finalize()
+    
+    # Encrypt the padded value
+    ciphertext = encryptor.update(padded_value) + encryptor.finalize()
+    
+    # Combine IV and ciphertext, and encode as base64
     encrypted_value = base64.b64encode(iv + ciphertext).decode('utf-8')
+    
     return encrypted_value
 
 def decrypt_value(encrypted_data, key):
