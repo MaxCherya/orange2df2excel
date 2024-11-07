@@ -249,8 +249,6 @@ This function is helpful for regenerating the encryption key using the stored sa
 - **pandas**
 - **openpyxl**
 - **koboextractor**
-- **cryptography**
-- **pycryptodome**
 
 ## License
 
