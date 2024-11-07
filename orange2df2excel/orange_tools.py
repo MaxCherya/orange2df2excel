@@ -191,7 +191,7 @@ def encrypt_value(value, key):
     encrypted_value = base64.b64encode(iv + ciphertext).decode('utf-8')
     return encrypted_value
 
-def decrypt_value(encrypted_value, key):
+def decrypt_value(encrypted_data, key):
     """
     Decrypts a given encrypted value using AES encryption in CBC mode.
 
@@ -202,7 +202,6 @@ def decrypt_value(encrypted_value, key):
     Returns:
         str: The decrypted plaintext value as a string.
     """
-    encrypted_data = base64.b64decode(encrypted_value)
     iv = encrypted_data[:16]
     ciphertext = encrypted_data[16:]
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
