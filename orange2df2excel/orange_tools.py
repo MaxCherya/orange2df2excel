@@ -158,40 +158,30 @@ def generate_bnf_id(name, surname, dob):
 
 def gen_encryption_key(password):
     """
-    Generates an AES encryption key using a password and a random salt,
-    then formats them for storage as Base64-encoded strings.
+    Generates an AES encryption key using a password and a random salt.
 
     Parameters:
         password (str): The password or passphrase used for key derivation.
 
     Returns:
-        dict: A dictionary with Base64-encoded 'key' and 'salt' strings.
+        str: A formatted string showing the derived key and salt.
     """
     salt = get_random_bytes(32)
     key = PBKDF2(password, salt, dkLen=32, count=1000000)
-    encoded_key = base64.b64encode(key).decode('utf-8')
-    encoded_salt = base64.b64encode(salt).decode('utf-8')
-    return {
-        "key": encoded_key,
-        "salt": encoded_salt
-    }
+    formatted = f"Key: {key}\nSalt: {salt}"
+    return formatted
 
-def encrypt_value(value, encoded_key):
+def encrypt_value(value, key):
     """
     Encrypts a given value (string or number) using AES encryption in CBC mode with a random initialization vector (IV).
 
     Parameters:
         value (str, int, float): The plaintext value to encrypt. Can be a string or a number.
-        encoded_key (str): A Base64-encoded 32-byte AES encryption key, which will be decoded within the function.
+        key (bytes): The 32-byte AES encryption key.
 
     Returns:
-        str: The base64-encoded encrypted value, which includes the IV and ciphertext.
-    
-    Notes:
-        This function handles the encoding and decoding of the key to ensure compatibility with AES encryption.
-        The IV is generated randomly for each encryption operation and is included in the output.
+        str: The base64-encoded encrypted value.
     """
-    key = base64.b64decode(encoded_key)
     value = str(value)
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
@@ -201,22 +191,17 @@ def encrypt_value(value, encoded_key):
     encrypted_value = base64.b64encode(iv + ciphertext).decode('utf-8')
     return encrypted_value
 
-def decrypt_value(encrypted_value, encoded_key):
+def decrypt_value(encrypted_value, key):
     """
     Decrypts a given encrypted value using AES encryption in CBC mode.
 
     Parameters:
-        encrypted_value (str): The base64-encoded encrypted value, which includes both the IV and ciphertext.
-        encoded_key (str): A Base64-encoded 32-byte AES decryption key, which will be decoded within the function.
+        encrypted_value (str): The base64-encoded encrypted value.
+        key (bytes): The 32-byte AES decryption key.
 
     Returns:
         str: The decrypted plaintext value as a string.
-
-    Notes:
-        This function assumes that the encrypted_value includes the IV in the first 16 bytes, followed by the ciphertext.
-        The encoded_key will be decoded to bytes for AES decryption compatibility.
     """
-    key = base64.b64decode(encoded_key)
     encrypted_data = base64.b64decode(encrypted_value)
     iv = encrypted_data[:16]
     ciphertext = encrypted_data[16:]
@@ -227,19 +212,14 @@ def decrypt_value(encrypted_value, encoded_key):
 
 def rederive_key(password, salt):
     """
-    Re-derives the AES encryption key using the original password and salt, and encodes it in Base64.
+    Re-derives the AES encryption key using the original password and salt.
 
     Parameters:
         password (str): The original password or passphrase used for key derivation.
         salt (bytes): The original salt used during the initial key derivation.
 
     Returns:
-        str: The re-derived 32-byte encryption key, encoded in Base64 for easy storage and transfer.
-
-    Notes:
-        The returned key is Base64-encoded to be compatible with functions that expect an encoded key.
-        This function uses PBKDF2 with SHA-1 and a high iteration count for secure key derivation.
+        bytes: The re-derived 32-byte encryption key.
     """
     key = PBKDF2(password, salt, dkLen=32, count=1000000)
-    encoded_key = base64.b64encode(key).decode('utf-8')
-    return encoded_key
+    return key

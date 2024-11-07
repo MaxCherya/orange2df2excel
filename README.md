@@ -136,11 +136,9 @@ print(beneficiary_id)  # Example output: "5-SMI-JOH-010190-a1b2c3d4e5f67890abcd1
 
 This function ensures each generated ID is unique by combining structured personal data with a full hash component, allowing for consistency and minimizing the chance of duplicates even with similar input data.
 
----
-
 ### Function: `gen_encryption_key`
 
-The `gen_encryption_key` function generates a 32-byte AES encryption key using a provided password and a randomly generated salt. It employs PBKDF2 for secure key derivation, ensuring a unique key for each password-salt combination.
+The `gen_encryption_key` function generates a 32-byte AES encryption key using a provided password and a randomly generated salt. This function uses PBKDF2 for key derivation to ensure a secure and unique key for each password-salt combination.
 
 #### Parameters
 
@@ -148,9 +146,9 @@ The `gen_encryption_key` function generates a 32-byte AES encryption key using a
 
 #### Returns
 
-- `formatted` (str): A formatted string showing both the derived key and salt values:
+- `formatted` (str): A formatted string showing both the derived key and salt values. This string includes:
   - `Key`: The 32-byte derived encryption key.
-  - `Salt`: The random 32-byte salt used during key derivation, which should be stored securely to allow re-derivation of the key if needed.
+  - `Salt`: The random 32-byte salt used during key derivation, which should be securely stored to allow re-derivation of the key if needed.
 
 #### Example
 
@@ -161,45 +159,45 @@ formatted_key_salt = gen_encryption_key(password)
 print(formatted_key_salt)  # Output: Key: b'...' Salt: b'...'
 ```
 
-This function provides a secure way to generate and display the key and salt, which can be stored for later re-derivation.
+This function is useful for securely generating and displaying the key and salt, which can be stored securely for later use.
 
 ---
 
 ### Function: `encrypt_value`
 
-The `encrypt_value` function encrypts a given value using AES encryption in CBC mode with a randomly generated initialization vector (IV). It supports encrypting strings and numbers by converting them to strings before encryption.
+The `encrypt_value` function encrypts a given value using AES encryption in CBC mode with a random initialization vector (IV). The function supports encrypting both strings and numbers, converting them to strings before encryption.
 
 #### Parameters
 
-- `value` (str, int, float): The plaintext value to encrypt, as a string or number.
-- `encoded_key` (str): The Base64-encoded 32-byte AES encryption key.
+- `value` (str, int, float): The plaintext value to encrypt. It can be either a string or a number.
+- `key` (bytes): The 32-byte AES encryption key to use for encryption.
 
 #### Returns
 
-- `encrypted_value` (str): The base64-encoded encrypted value, which includes both the IV and ciphertext for secure storage or transmission.
+- `encrypted_value` (str): The base64-encoded encrypted value, which includes the IV and ciphertext for secure storage or transmission.
 
 #### Example
 
 ```python
 # Example usage of encrypt_value
 value_to_encrypt = "sensitive_data"
-encoded_key = "Base64_encoded_key_here"  # Base64-encoded AES key
-encrypted_value = encrypt_value(value_to_encrypt, encoded_key)
+key = b'some_32_byte_key_here...'  # Example key
+encrypted_value = encrypt_value(value_to_encrypt, key)
 print(encrypted_value)  # Output: Base64 encoded encrypted value
 ```
 
-This function allows for secure encryption of sensitive information, producing a base64-encoded output that is convenient for storage or transfer.
+This function allows for secure encryption of sensitive information, returning a base64-encoded string for easy storage or transfer.
 
 ---
 
 ### Function: `decrypt_value`
 
-The `decrypt_value` function decrypts an AES-encrypted value using CBC mode. It requires the base64-encoded encrypted data (which includes both IV and ciphertext) and the original AES key used for encryption.
+The `decrypt_value` function decrypts a given encrypted value using AES encryption in CBC mode. It requires the base64-encoded encrypted value and the AES key that was originally used to encrypt the value.
 
 #### Parameters
 
 - `encrypted_value` (str): The base64-encoded encrypted value, containing both the IV and ciphertext.
-- `encoded_key` (str): The Base64-encoded 32-byte AES decryption key.
+- `key` (bytes): The 32-byte AES decryption key.
 
 #### Returns
 
@@ -210,39 +208,39 @@ The `decrypt_value` function decrypts an AES-encrypted value using CBC mode. It 
 ```python
 # Example usage of decrypt_value
 encrypted_value = "Base64_encrypted_value_here..."
-encoded_key = "Base64_encoded_key_here"  # Base64-encoded AES key used during encryption
-decrypted_value = decrypt_value(encrypted_value, encoded_key)
+key = b'some_32_byte_key_here...'  # Example key used during encryption
+decrypted_value = decrypt_value(encrypted_value, key)
 print(decrypted_value)  # Output: Original plaintext value
 ```
 
-This function retrieves the original plaintext by decrypting the stored encrypted data with the correct AES key.
+This function is essential for retrieving the original plaintext data by decrypting the stored encrypted value with the correct AES key.
 
 ---
 
 ### Function: `rederive_key`
 
-The `rederive_key` function re-derives the original AES encryption key using the same password and salt used in the initial derivation. This is useful for accessing the encryption key without storing it directly.
+The `rederive_key` function re-derives the original AES encryption key using the same password and salt that were used in the initial derivation. This is useful for accessing the encryption key without storing it directly.
 
 #### Parameters
 
 - `password` (str): The original password or passphrase used for key derivation.
-- `salt` (bytes): The salt used during the initial key derivation.
+- `salt` (bytes): The salt that was originally used during the initial key derivation.
 
 #### Returns
 
-- `encoded_key` (str): The Base64-encoded 32-byte re-derived encryption key.
+- `key` (bytes): The re-derived 32-byte encryption key.
 
 #### Example
 
 ```python
 # Example usage of rederive_key
 password = "my_secure_password"
-salt = b'stored_salt_here...'  # The stored salt from the initial key generation
-encoded_key = rederive_key(password, salt)
-print(encoded_key)  # Output: Base64-encoded re-derived 32-byte key
+salt = b'stored_salt_here...'  # Example stored salt from the initial key generation
+key = rederive_key(password, salt)
+print(key)  # Output: The re-derived 32-byte key
 ```
 
-This function is helpful for regenerating the encryption key using the stored salt and password, providing the key as a Base64-encoded string for compatibility with encryption/decryption functions.
+This function is particularly useful for securely regenerating the encryption key using the stored salt and password without needing to store the key directly.
 
 ## Requirements
 
