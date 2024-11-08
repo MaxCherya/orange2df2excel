@@ -215,3 +215,75 @@ def rederive_key(password, salt):
     """
     key = PBKDF2(password, salt, dkLen=32, count=1000000)
     return key
+
+def encrypt_file(input_file_path, output_file_path, key):
+    """
+    Encrypts the contents of a specified file using AES encryption in CBC mode with PKCS7 padding.
+
+    Parameters:
+        input_file_path (str): The path to the file that needs to be encrypted.
+        output_file_path (str): The path where the encrypted file will be saved. (.en extension)
+        key (bytes): The 32-byte AES encryption key.
+
+    Returns:
+        None: This function does not return a value but saves the encrypted file at the specified path.
+
+    Notes:
+        - The function generates a random 16-byte initialization vector (IV) for each encryption operation.
+        - The IV is written at the beginning of the output file and is required for decryption.
+        - The file is read and encrypted in chunks to optimize memory usage.
+    """
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    with open(input_file_path, 'rb') as input_file, open(output_file_path, 'wb') as output_file:
+        output_file.write(iv)
+        while True:
+            chunk = input_file.read(1024)
+            if len(chunk) == 0:
+                break
+            padded_chunk = padder.update(chunk)
+            encrypted_chunk = encryptor.update(padded_chunk)
+            output_file.write(encrypted_chunk)
+        padded_chunk = padder.finalize()
+        encrypted_chunk = encryptor.update(padded_chunk) + encryptor.finalize()
+        output_file.write(encrypted_chunk)
+    print(f"File '{input_file_path}' encrypted successfully and saved as '{output_file_path}'")
+
+def decrypt_file(encrypted_file_path, output_file_path, key):
+    """
+    Decrypts a file that was encrypted using AES encryption in CBC mode with PKCS7 padding.
+
+    Parameters:
+        encrypted_file_path (str): The path to the encrypted file that needs to be decrypted.
+        output_file_path (str): The path where the decrypted file will be saved. (.en extension)
+        key (bytes): The 32-byte AES decryption key.
+
+    Returns:
+        None: This function does not return a value but saves the decrypted file at the specified path.
+
+    Notes:
+        - The function reads the 16-byte initialization vector (IV) from the beginning of the encrypted file.
+        - If the IV is missing or invalid, a ValueError will be raised.
+        - After decryption, PKCS7 padding is removed to restore the original content.
+        - The file is read and decrypted in chunks for efficient memory usage.
+    """
+    with open(encrypted_file_path, 'rb') as encrypted_file, open(output_file_path, 'wb') as output_file:
+        iv = encrypted_file.read(16)
+        if len(iv) != 16:
+            raise ValueError("Invalid IV length, file may not be encrypted correctly.")
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+        unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+        while True:
+            chunk = encrypted_file.read(1024)
+            if len(chunk) == 0:
+                break
+            decrypted_chunk = decryptor.update(chunk)
+            if len(chunk) < 1024:
+                decrypted_chunk = unpadder.update(decrypted_chunk) + unpadder.finalize()
+            output_file.write(decrypted_chunk)
+        output_file.write(decryptor.finalize())
+    print(f"File '{encrypted_file_path}' decrypted successfully and saved as '{output_file_path}'")
+

@@ -242,6 +242,66 @@ print(key)  # Output: The re-derived 32-byte key
 
 This function is particularly useful for securely regenerating the encryption key using the stored salt and password without needing to store the key directly.
 
+---
+
+### Function: `encrypt_file`
+
+The `encrypt_file` function encrypts the contents of a specified file using AES encryption in CBC mode with PKCS7 padding. The encrypted file will include a random initialization vector (IV) at the beginning, which is necessary for decryption.
+
+#### Parameters
+
+- `input_file_path` (str): The path to the file that needs to be encrypted.
+- `output_file_path` (str): The path where the encrypted file will be saved.
+- `key` (bytes): A 32-byte AES encryption key.
+
+#### Returns
+
+- None
+
+#### Example
+
+```python
+encrypt_file("plaintext.txt", "encrypted_file.en", key)
+```
+
+This function reads the input file in chunks, applies padding, and writes the encrypted data along with the IV at the beginning of the output file for secure storage or transfer.
+
+#### Notes
+
+- The IV is stored at the beginning of the encrypted file, which is required for decryption.
+- The file is encrypted in chunks for efficient memory usage.
+
+---
+
+### Function: `decrypt_file`
+
+The `decrypt_file` function decrypts a file that was encrypted using AES encryption in CBC mode and PKCS7 padding. The function reads the IV from the start of the encrypted file and removes padding after decryption to recover the original file contents.
+
+#### Parameters
+
+- `encrypted_file_path` (str): The path to the encrypted file that needs to be decrypted.
+- `output_file_path` (str): The path where the decrypted file will be saved.
+- `key` (bytes): A 32-byte AES decryption key.
+
+#### Returns
+
+- None
+
+#### Example
+
+```python
+decrypt_file("encrypted_file.en", "decrypted_file.txt", key)
+```
+
+This function reads the encrypted file in chunks, decrypts it, and removes padding from the decrypted data to restore the original file contents.
+
+#### Notes
+
+- The function reads the IV from the start of the encrypted file; if the IV is missing or invalid, it will raise a `ValueError`.
+- The decrypted output will be saved at the specified path, restoring the file to its original contents.
+
+---
+
 ## Requirements
 
 - **pandas**
