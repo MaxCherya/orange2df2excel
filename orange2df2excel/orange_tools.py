@@ -16,6 +16,7 @@ import pandas as pd
 import os
 from io import StringIO
 import hashlib
+import bcrypt
 
 def raw_data_to_excel(df, file_path, sheet_name):
     """
@@ -286,4 +287,22 @@ def decrypt_file(encrypted_file_path, output_file_path, key):
             output_file.write(decrypted_chunk)
         output_file.write(decryptor.finalize())
     print(f"File '{encrypted_file_path}' decrypted successfully and saved as '{output_file_path}'")
+
+def hash_password(password):
+    """
+    Hashes the provided password using bcrypt and returns the resulting hash as a string.
+
+    This function generates a secure hash for the input password by:
+    - Generating a salt with a cost factor of 15 rounds, enhancing the security level of the hash.
+    - Hashing the password in combination with the generated salt to ensure unique hashes for identical passwords.
+
+    Parameters:
+    password (str): The plain text password to be hashed.
+
+    Returns:
+    str: The bcrypt hash of the password, encoded as a string to facilitate storage or comparison.
+    """
+    salt = bcrypt.gensalt(rounds=15)
+    hashed = bcrypt.hashpw(password.encode(), salt)
+    return hashed.decode()
 

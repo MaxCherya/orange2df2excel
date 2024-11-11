@@ -302,11 +302,31 @@ This function reads the encrypted file in chunks, decrypts it, and removes paddi
 
 ---
 
+### Function: `hash_password`
+
+The `hash_password` function securely hashes a plain-text password using bcrypt, incorporating a salt to ensure unique hash results for identical passwords. The generated hash can be stored and used to verify passwords.
+
+#### Parameters
+
+- `password` (str): The plain-text password to be hashed.
+
+#### Returns
+
+- `str`: The bcrypt hash of the password, encoded as a string.
+
+#### Example
+
+```python
+hashed_password = hash_password("my_secure_password")
+
 ## Requirements
 
 - **pandas**
 - **openpyxl**
 - **koboextractor**
+- **cryptography**
+- **pycryptodome**
+- **bcrypt**
 
 ## License
 

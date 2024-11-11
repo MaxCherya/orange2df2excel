@@ -15,7 +15,8 @@ setup(
         "openpyxl",
         "koboextractor",
         "cryptography",
-        "pycryptodome"
+        "pycryptodome",
+        "bcrypt"
     ],
     classifiers=[                                    # Optional metadata for package indexing
         "Programming Language :: Python :: 3",
