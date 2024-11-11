@@ -318,6 +318,7 @@ The `hash_password` function securely hashes a plain-text password using bcrypt,
 
 ```python
 hashed_password = hash_password("my_secure_password")
+```
 
 ## Requirements
 
