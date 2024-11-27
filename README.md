@@ -31,6 +31,61 @@ from orange2df2excel import raw_data_to_excel
 raw_data_to_excel(df, "example.xlsx", "raw data")
 ```
 
+### Function: `raw_data_to_excel_with_all_charts`
+
+The `raw_data_to_excel_with_all_charts` function generates an Excel file containing raw data and a dashboard. The dashboard includes various charts (e.g., bar, line, pie, doughnut) and a section for total values. It is a flexible tool for creating visual summaries of data directly in Excel using `xlsxwriter`.
+
+#### Parameters
+
+- `df` (*pandas.DataFrame*): The DataFrame to be written to the Excel file.
+- `file_path` (*str*): The path where the Excel file will be saved.
+- `chart_config` (*dict*): A dictionary to configure the charts in the dashboard. The dictionary keys are chart types (e.g., `"bar"`, `"line"`, `"pie"`, `"doughnut"`). Each key maps to a dictionary with the following keys:
+  - `'category_col'` (*str*): Column name to use as categories (e.g., x-axis or labels).
+  - `'value_col'` (*str*): Column name to use as values (e.g., y-axis or data points).
+- `totals` (*list, optional*): A list of column names for which totals are calculated and displayed at the top of the dashboard. If `None`, totals will not be displayed. 
+  - Numeric columns: Totals are calculated as the sum.
+  - Non-numeric columns: Totals represent the count of occurrences for each unique value.
+
+#### Returns
+
+- None. The function saves the Excel file at the specified `file_path`.
+
+#### Behavior
+
+1. **Raw Data Sheet**:
+   - Writes the full DataFrame to the "Raw Data" sheet in the Excel file.
+
+2. **Dashboard Sheet**:
+   - **Totals Section**: Displays sums for numeric columns and counts for non-numeric columns (if specified in `totals`).
+   - **Charts**: Adds charts to visualize data based on the provided `chart_config`. 
+     - Bar and line charts include data labels with both category names and values (e.g., `"A: 42"`).
+     - Pie and doughnut charts display percentages along with category names.
+
+#### Example
+
+```python
+import pandas as pd
+
+# Example data
+data = {
+    "Donor": ["A", "B", "A", "C", "A", "B", "C", "A", "A", "B"],
+    "Sessions": [10, 5, 15, 20, 8, 12, 5, 15, 10, 8],
+    "Cost": [100, 50, 75, 120, 80, 130, 60, 100, 150, 70],
+}
+df = pd.DataFrame(data)
+
+# Chart configuration
+chart_config = {
+    "bar": {"category_col": "Donor", "value_col": "Sessions"},
+    "pie": {"category_col": "Donor", "value_col": "Sessions"},
+}
+
+# Specify totals
+totals = ["Sessions", "Cost", "Donor"]
+
+# Call the function
+raw_data_to_excel_with_all_charts(df, "dashboard_with_totals.xlsx", chart_config, totals)
+
 ### Function: `fetch_kobo_data`
 
 The `fetch_kobo_data` function retrieves data from a specified KoBoToolbox form and loads it into a pandas DataFrame, making it easy to analyze and manipulate within Python. This function uses `KoboExtractor` to streamline the process and handle API interactions.

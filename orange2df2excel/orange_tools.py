@@ -1,6 +1,7 @@
 from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils.dataframe import dataframe_to_rows
+import xlsxwriter
 from koboextractor import KoboExtractor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
@@ -64,6 +65,83 @@ def raw_data_to_excel(df, file_path, sheet_name):
         worksheet.column_dimensions[col_letter].width = adjusted_width
 
     workbook.save(file_path)
+
+def raw_data_to_excel_with_all_charts(df, file_path, chart_config, totals=None):
+    """
+    Write raw data to an Excel file and create a clean dashboard with various chart types using `xlsxwriter`.
+
+    Parameters:
+    - df: pandas.DataFrame - The data to write to the Excel file.
+    - file_path: str - Path to save the Excel file.
+    - chart_config: dict - Dictionary to configure charts.
+        Keys are chart types (e.g., "bar", "line", "pie").
+        Values are dicts with keys:
+            - 'category_col': str - Column to use as categories.
+            - 'value_col': str - Column to use as values.
+    - totals: list - List of column names to calculate totals for. If None, totals will not be shown.
+    """
+    with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Raw Data', index=False)
+        workbook = writer.book
+        dashboard = workbook.add_worksheet('Dashboard')
+        row_offset = 0
+        if totals:
+            dashboard.write_row(row_offset, 0, ["Column", "Total"])
+            row_offset += 1
+            for column in totals:
+                if column in df.columns:
+                    if pd.api.types.is_numeric_dtype(df[column]):
+                        total_value = df[column].sum()
+                    else:
+                        total_value = df[column].value_counts().sum()
+                    dashboard.write_row(row_offset, 0, [column, total_value])
+                    row_offset += 1
+            row_offset += 1
+
+        for chart_type, config in chart_config.items():
+            category_col = config.get('category_col')
+            value_col = config.get('value_col')
+            if not category_col or not value_col:
+                continue
+            if pd.api.types.is_numeric_dtype(df[value_col]):
+                summary = df.groupby(category_col)[value_col].sum().reset_index()
+            else:
+                summary = df[category_col].value_counts().reset_index()
+                summary.columns = [category_col, value_col]
+            dashboard.write_row(row_offset, 0, [category_col, value_col])  # Write header
+            for idx, row in enumerate(summary.itertuples(index=False), start=1):
+                dashboard.write_row(row_offset + idx, 0, row)
+
+            chart = None
+            if chart_type == "bar":
+                chart = workbook.add_chart({'type': 'column'})
+            elif chart_type == "line":
+                chart = workbook.add_chart({'type': 'line'})
+            elif chart_type == "pie":
+                chart = workbook.add_chart({'type': 'pie'})
+                chart.set_style(10)
+            elif chart_type == "doughnut":
+                chart = workbook.add_chart({'type': 'doughnut'})
+                chart.set_style(10)
+
+            chart.add_series({
+                'name': f'{value_col} by {category_col}',
+                'categories': [f'Dashboard', row_offset + 1, 0, row_offset + len(summary), 0],
+                'values': [f'Dashboard', row_offset + 1, 1, row_offset + len(summary), 1],
+                'data_labels': {'value': True, 'category': True},
+            })
+
+            if chart_type in ["bar", "line"]:
+                chart.set_x_axis({'name': category_col, 'name_font': {'size': 12, 'bold': True}})
+                chart.set_y_axis({'name': value_col, 'name_font': {'size': 12, 'bold': True}})
+            elif chart_type in ["pie", "doughnut"]:
+                chart.set_title({'name': f'{value_col} by {category_col}'})
+
+            if chart:
+                dashboard.insert_chart(row_offset, 3, chart, {'x_scale': 1.5, 'y_scale': 1.5})
+            row_offset += len(summary) + 5
+
+    print(f"Excel file with dashboard saved at: {file_path}")
 
 def fetch_kobo_data(token, form_id, base_url="https://kf.kobotoolbox.org/api/v2"):
     """

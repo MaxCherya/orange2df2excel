@@ -16,7 +16,8 @@ setup(
         "koboextractor",
         "cryptography",
         "pycryptodome",
-        "bcrypt"
+        "bcrypt",
+        "xlsxwriter"
     ],
     classifiers=[                                    # Optional metadata for package indexing
         "Programming Language :: Python :: 3",
