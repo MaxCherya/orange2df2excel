@@ -85,6 +85,7 @@ totals = ["Sessions", "Cost", "Donor"]
 
 # Call the function
 raw_data_to_excel_with_all_charts(df, "dashboard_with_totals.xlsx", chart_config, totals)
+```
 
 ### Function: `fetch_kobo_data`
 
