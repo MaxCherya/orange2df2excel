@@ -192,6 +192,62 @@ print(beneficiary_id)  # Example output: "5-SMI-JOH-010190-a1b2c3d4e5f67890abcd1
 
 This function ensures each generated ID is unique by combining structured personal data with a full hash component, allowing for consistency and minimizing the chance of duplicates even with similar input data.
 
+### Function: `generate_session_id`
+
+The `generate_session_id` function creates a unique session identifier based on donor name, settlement location, enumerator name, submission date, and session date. This ID structure combines key details of the session, ensuring a structured format and uniqueness for each record.
+
+#### Parameters
+
+- `df` (DataFrame): The input DataFrame containing the relevant session data.
+- `donor_name` (str): The column name in the DataFrame that stores the donor's name.
+- `location_settlement` (str): The column name in the DataFrame that stores the settlement or location name.
+- `name_enumerator` (str): The column name in the DataFrame that stores the enumerator's name.
+- `submission_date` (str): The column name in the DataFrame that stores the submission date, formatted as `YYYY-MM-DD`.
+- `session_date` (str): The column name in the DataFrame that stores the session date, formatted as `YYYY-MM-DD`.
+- `project_name` (str): A static string representing the project's name to be included in the session ID.
+
+#### Returns
+
+- `DataFrame`: The original DataFrame with an additional column, `session_id_sql`, containing unique session IDs for each record. The session ID is structured as follows:
+  - The donor name (with spaces, colons, and commas removed, and converted to uppercase).
+  - The project name.
+  - The settlement location (processed similarly to the donor name).
+  - The first three characters of the enumerator's name (processed similarly, padded with 'X' if fewer than three characters).
+  - The submission date in `DDMMYY` format (with spaces, colons, and commas removed, and converted to uppercase).
+  - The session date in `DDMMYY` format (processed similarly).
+
+#### Example
+
+```python
+# Example DataFrame
+import pandas as pd
+
+data = {
+    'donor_name': ['Donor A', 'Donor B'],
+    'location_settlement': ['Settlement X', 'Settlement Y'],
+    'name_enumerator': ['John Doe', 'Jane Smith'],
+    'submission_date': ['2024-12-10', '2024-12-11'],
+    'session_date': ['2024-12-09', '2024-12-10']
+}
+df = pd.DataFrame(data)
+
+# Generate unique session IDs
+project_name = 'EORE'
+df = generate_session_id(df, 'donor_name', 'location_settlement', 'name_enumerator', 'submission_date', 'session_date', project_name)
+
+# Output the DataFrame
+print(df)
+```
+
+#### Example Output
+
+| donor_name | location_settlement | name_enumerator | submission_date | session_date | session_id_sql                 |
+|------------|---------------------|-----------------|-----------------|--------------|--------------------------------|
+| Donor A    | Settlement X        | John Doe        | 2024-12-10      | 2024-12-09   | DONORA-EORE-SETTLEMENTX-JOH-101224-091224 |
+| Donor B    | Settlement Y        | Jane Smith      | 2024-12-11      | 2024-12-10   | DONORB-EORE-SETTLEMENTY-JAN-111224-101224 |
+
+This function ensures that each session ID is unique and follows a standardized format, making it easy to identify and track individual sessions.
+
 ### Function: `gen_encryption_key`
 
 The `gen_encryption_key` function generates a 32-byte AES encryption key using a provided password and a randomly generated salt. This function uses PBKDF2 for key derivation to ensure a secure and unique key for each password-salt combination.
