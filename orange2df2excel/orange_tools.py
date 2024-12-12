@@ -415,3 +415,19 @@ def hash_password(password):
     hashed = bcrypt.hashpw(password.encode(), salt)
     return hashed.decode()
 
+def download_surveycto_photo(url, username, password):
+    try:
+        response = requests.get(url, auth=(username, password), stream=True)
+        response.raise_for_status()
+        return response.content
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading the photo: {e}")
+        return None
+
+def save_photo_from_bytes(photo_bytes, save_path):
+    try:
+        with open(save_path, 'wb') as file:
+            file.write(photo_bytes)
+        print(f"Photo successfully saved: {save_path}")
+    except Exception as e:
+        print(f"Error saving photo: {e}")
