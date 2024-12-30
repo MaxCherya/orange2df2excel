@@ -251,20 +251,27 @@ def generate_bnf_id(name, surname, dob):
     Returns:
         str: Generated unique beneficiary ID with hash included.
     """
+    # Handle missing surname or dob
+    surname = surname or "UNKNOWN"
+    dob = dob or "0000-00-00"
+
     surname_length = len(surname)
     surname_part = surname[:3].upper().ljust(3, 'X')  # Pads with 'X' if fewer than 3 letters
     name_part = name[:3].upper().ljust(3, 'X')
-    
-    # Convert DOB from 'YYYY-MM-DD' to 'DDMMYY' format
-    dob_parts = dob.split("-")
-    dob_formatted = dob_parts[2] + dob_parts[1] + dob_parts[0][2:]  # DDMMYY format
 
-    to_hash = f'{surname}{name}{dob_parts}'
+    # Convert DOB from 'YYYY-MM-DD' to 'DDMMYY' format if valid
+    if dob != "0000-00-00":
+        dob_parts = dob.split("-")
+        dob_formatted = dob_parts[2] + dob_parts[1] + dob_parts[0][2:]  # DDMMYY format
+    else:
+        dob_formatted = "000000"  # Default DOB format
+
+    to_hash = f'{surname}{name}{dob}'
     
     base_id = f"{surname_length}-{surname_part}-{name_part}-{dob_formatted}"
     hash_suffix = hashlib.md5(to_hash.encode()).hexdigest()
     beneficiary_id = f"{base_id}-{hash_suffix}"
-    
+
     return beneficiary_id
 
 def gen_encryption_key(password):
