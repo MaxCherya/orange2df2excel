@@ -239,31 +239,31 @@ def generate_session_id(df, donor_name, location_settlement, name_enumerator, su
 
     return df
 
-def generate_bnf_id(name, surname, dob):
+def generate_bnf_id(name, surname=None, dob=None):
     """
     Generates a unique beneficiary ID with a hash as the final component.
 
     Parameters:
         name (str): First name of the person.
-        surname (str): Last name of the person.
-        dob (str): Date of birth in 'YYYY-MM-DD' format.
+        surname (str, optional): Last name of the person. Defaults to 'UNKNOWN' if not provided or invalid.
+        dob (str, optional): Date of birth in 'YYYY-MM-DD' format. Defaults to '0000-00-00' if not provided or invalid.
 
     Returns:
         str: Generated unique beneficiary ID with hash included.
     """
-    # Handle missing surname or dob
-    surname = surname or "UNKNOWN"
-    dob = dob or "0000-00-00"
+    # Handle missing or invalid surname
+    surname = str(surname) if isinstance(surname, str) else "UNKNOWN"
+    dob = str(dob) if isinstance(dob, str) else "0000-00-00"
 
     surname_length = len(surname)
     surname_part = surname[:3].upper().ljust(3, 'X')  # Pads with 'X' if fewer than 3 letters
     name_part = name[:3].upper().ljust(3, 'X')
 
     # Convert DOB from 'YYYY-MM-DD' to 'DDMMYY' format if valid
-    if dob != "0000-00-00":
+    try:
         dob_parts = dob.split("-")
         dob_formatted = dob_parts[2] + dob_parts[1] + dob_parts[0][2:]  # DDMMYY format
-    else:
+    except (IndexError, ValueError):
         dob_formatted = "000000"  # Default DOB format
 
     to_hash = f'{surname}{name}{dob}'
