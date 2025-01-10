@@ -208,7 +208,7 @@ def fetch_surveycto_data(isDataset, servername, form_or_dataset_id, username, pa
     except Exception as err:
         print(f"Other error occurred: {err}")
 
-def generate_session_id(df, donor_name, location_settlement, name_enumerator, submission_date, session_date, project_name, total_bnf, comment, girls_final, boys_final, women_final, men_final):
+def generate_session_id(df, donor_name, location_settlement, name_enumerator, session_date, project_name, total_bnf, comment, girls_final, boys_final, women_final, men_final):
     """
     Generates a unique session ID.
 
@@ -236,7 +236,6 @@ def generate_session_id(df, donor_name, location_settlement, name_enumerator, su
         project_name + '-' +
         df[location_settlement].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
         df[name_enumerator].str[:3].str.replace(r"[ :,]", "", regex=True).str.upper() + '-' +
-        df[submission_date].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
         df[session_date].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
         df[total_bnf].astype(str) + '-' +
         df[comment].str.len().astype(str) + '-' +
