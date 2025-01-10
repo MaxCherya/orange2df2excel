@@ -226,10 +226,7 @@ def generate_session_id(df, donor_name, location_settlement, name_enumerator, su
     Returns:
         df: The initial dataframe with a new column named 'session_id_sql' containing the unique session ID.
     """
-    required_columns = [donor_name, location_settlement, name_enumerator, submission_date, session_date, project_name, total_bnf, comment]
-    if not all(col in df.columns for col in required_columns):
-        raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
-
+    
     # Handle missing or null comments by replacing them with 'XXX'
     df[comment] = df[comment].fillna('XXX')
 
