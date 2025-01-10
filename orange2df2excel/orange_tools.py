@@ -208,7 +208,7 @@ def fetch_surveycto_data(isDataset, servername, form_or_dataset_id, username, pa
     except Exception as err:
         print(f"Other error occurred: {err}")
 
-def generate_session_id(df, donor_name, location_settlement, name_enumerator, submission_date, session_date, project_name):
+def generate_session_id(df, donor_name, location_settlement, name_enumerator, submission_date, session_date, project_name, total_bnf, comment):
     """
     Generates a unique session ID.
 
@@ -220,21 +220,29 @@ def generate_session_id(df, donor_name, location_settlement, name_enumerator, su
         submission_date (str): Name of the column for submission date
         session_date (str): Name of the column for session date
         project_name (str): Name of the project
+        total_bnf (str): Name of the column for total beneficiaries
+        comment (str): Name of the column for comments
 
     Returns:
-        df: your initial dataframe with a new column named 'session_id_sql' where will be unique session id
+        df: The initial dataframe with a new column named 'session_id_sql' containing the unique session ID.
     """
-    required_columns = [donor_name, location_settlement, name_enumerator, submission_date, session_date]
+    required_columns = [donor_name, location_settlement, name_enumerator, submission_date, session_date, project_name, total_bnf, comment]
     if not all(col in df.columns for col in required_columns):
         raise ValueError(f"The DataFrame must contain the following columns: {required_columns}")
 
+    # Handle missing or null comments by replacing them with 'XXX'
+    df[comment] = df[comment].fillna('XXX')
+
+    # Create the unique session ID
     df['session_id_sql'] = (
         df[donor_name].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
         project_name + '-' +
         df[location_settlement].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
         df[name_enumerator].str[:3].str.replace(r"[ :,]", "", regex=True).str.upper() + '-' +
         df[submission_date].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
-        df[session_date].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip()
+        df[session_date].str.replace(r"[ :,]", "", regex=True).str.upper().str.strip() + '-' +
+        df[total_bnf].astype(str) + '-' +
+        df[comment].str.len().astype(str)
     )
 
     return df
