@@ -290,6 +290,43 @@ def gen_encryption_key(password):
     formatted = f"Key: {key}\nSalt: {salt}"
     return formatted
 
+def encrypt_photo_for_sql(photo_bytes, key):
+    """
+    Encrypts photo bytes using AES-GCM encryption.
+
+    Args:
+        photo_bytes (bytes): The image in bytes.
+        key (bytes): 32-byte AES encryption key.
+
+    Returns:
+        str: Base64 encoded encrypted data (IV + tag + ciphertext).
+    """
+    iv = os.urandom(12)
+    cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    encrypted_photo = encryptor.update(photo_bytes) + encryptor.finalize()
+    encrypted_data = iv + encryptor.tag + encrypted_photo
+    return base64.b64encode(encrypted_data).decode('utf-8')
+
+def decrypt_photo_for_sql(encrypted_base64, key):
+    """
+    Decrypts AES-GCM encrypted photo from the database.
+
+    Args:
+        encrypted_base64 (str): Base64 encoded encrypted data (IV + tag + ciphertext).
+        key (bytes): 32-byte AES decryption key.
+
+    Returns:
+        bytes: Decrypted photo bytes.
+    """
+    encrypted_bytes = base64.b64decode(encrypted_base64)
+    iv = encrypted_bytes[:12]
+    tag = encrypted_bytes[12:28]
+    ciphertext = encrypted_bytes[28:]
+    cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend())
+    decryptor = cipher.decryptor()
+    return decryptor.update(ciphertext) + decryptor.finalize()
+
 def encrypt_value(value, key):
     """
     Encrypts a given value (string or number) using AES encryption in CBC mode with a random IV.
