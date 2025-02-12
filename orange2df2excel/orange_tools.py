@@ -2,6 +2,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils.dataframe import dataframe_to_rows
 import xlsxwriter
+from datetime import date, datetime
 from koboextractor import KoboExtractor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
@@ -328,6 +329,12 @@ def decrypt_photo_for_sql(encrypted_base64, key):
     decryptor = cipher.decryptor()
     return decryptor.update(ciphertext) + decryptor.finalize()
 
+def json_serializable(obj):
+    """ Convert non-serializable types (e.g., date, datetime) to string """
+    if isinstance(obj, (date, datetime)):
+        return obj.isoformat()  # Convert date to "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS"
+    raise TypeError(f"Type {type(obj)} not serializable")
+
 def encrypt_json_data(data, key):
     """
     Encrypts JSON data using AES-256-GCM.
@@ -337,8 +344,8 @@ def encrypt_json_data(data, key):
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
     encryptor = cipher.encryptor()
 
-    # Convert JSON data to bytes
-    json_data = json.dumps(data).encode()
+    # Convert JSON data to bytes (handle dates correctly)
+    json_data = json.dumps(data, default=json_serializable).encode()
 
     # Encrypt the data
     ciphertext = encryptor.update(json_data) + encryptor.finalize()
