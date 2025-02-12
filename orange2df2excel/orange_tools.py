@@ -6,6 +6,7 @@ from koboextractor import KoboExtractor
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
+import json
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Cipher import AES
@@ -326,6 +327,28 @@ def decrypt_photo_for_sql(encrypted_base64, key):
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend())
     decryptor = cipher.decryptor()
     return decryptor.update(ciphertext) + decryptor.finalize()
+
+def encrypt_json_data(data, key):
+    """
+    Encrypts JSON data using AES-256-GCM.
+    Returns base64-encoded ciphertext, IV, and authentication tag.
+    """
+    iv = os.urandom(12)  # 12-byte IV for AES-GCM
+    cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+
+    # Convert JSON data to bytes
+    json_data = json.dumps(data).encode()
+
+    # Encrypt the data
+    ciphertext = encryptor.update(json_data) + encryptor.finalize()
+
+    # Return Base64-encoded values
+    return {
+        "iv": base64.b64encode(iv).decode(),
+        "ciphertext": base64.b64encode(ciphertext).decode(),
+        "tag": base64.b64encode(encryptor.tag).decode()
+    }
 
 def encrypt_value(value, key):
     """
