@@ -357,6 +357,32 @@ def encrypt_json_data(data, key):
         "tag": base64.b64encode(encryptor.tag).decode()
     }
 
+def decrypt_json_data(encrypted_data, key):
+    """
+    Decrypts AES-256-GCM encrypted JSON data.
+    Expects a dictionary with base64-encoded IV, ciphertext, and tag.
+    Returns the decrypted JSON object.
+    """
+    try:
+        # Decode Base64 values
+        iv = base64.b64decode(encrypted_data["iv"])
+        ciphertext = base64.b64decode(encrypted_data["ciphertext"])
+        tag = base64.b64decode(encrypted_data["tag"])
+
+        # Create AES-GCM cipher
+        cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        # Decrypt the data
+        decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+
+        # Convert bytes back to JSON
+        return json.loads(decrypted_data.decode())
+    
+    except Exception as e:
+        print("Decryption error:", e)
+        return None
+
 def encrypt_value(value, key):
     """
     Encrypts a given value (string or number) using AES encryption in CBC mode with a random IV.
